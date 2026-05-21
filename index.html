@@ -151,23 +151,68 @@
     min-height: 320px;
     text-decoration: none;
     color: inherit;
-    overflow: hidden;
-    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease, background .3s ease;
+    transition: transform .3s ease, box-shadow .3s ease, background .3s ease;
     backdrop-filter: blur(6px);
     cursor: pointer;
+    isolation: isolate;
+    overflow: hidden;
   }
+  /* Inside corner glow */
   .card::before {
     content: "";
     position: absolute;
     inset: 0;
+    border-radius: inherit;
     background: radial-gradient(380px 200px at 12% 10%, var(--accent-glow, transparent), transparent 60%);
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.55;
     transition: opacity .3s ease;
+    z-index: 0;
   }
-  .card:hover { transform: translateY(-4px); border-color: var(--accent-border, var(--border)); }
+  /* Rotating border beam (uses a child .beam-frame > .beam) */
+  .beam-frame {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+    padding: 2px;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+  .beam {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 260%;
+    height: 260%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    background: conic-gradient(
+      from 0deg,
+      transparent 0%,
+      transparent 60%,
+      var(--accent) 75%,
+      #ffffff 80%,
+      var(--accent) 85%,
+      transparent 100%
+    );
+    animation: spinBeam 4s linear infinite;
+    animation-delay: var(--beam-delay, 0s);
+    filter: blur(1px) drop-shadow(0 0 6px var(--accent));
+  }
+  @keyframes spinBeam {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .card:hover { transform: translateY(-4px); box-shadow: 0 30px 70px -28px var(--accent-shadow, transparent); }
   .card:hover::before { opacity: 1; }
-  .card:hover { box-shadow: 0 30px 70px -28px var(--accent-shadow, transparent); }
+  .card:hover .beam {
+    animation-duration: 2s; /* speed up on hover */
+    filter: blur(1px) drop-shadow(0 0 10px var(--accent)) drop-shadow(0 0 16px var(--accent));
+  }
 
   .card-head {
     display: flex;
@@ -175,7 +220,7 @@
     align-items: flex-start;
     margin-bottom: 38px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
   }
   .icon {
     width: 52px; height: 52px;
@@ -210,20 +255,20 @@
     font-weight: 700;
     letter-spacing: -0.01em;
     margin-bottom: 10px;
-    position: relative; z-index: 1;
+    position: relative; z-index: 2;
   }
   .card p.desc {
     color: var(--muted-2);
     font-size: 13px;
     line-height: 1.55;
     margin-bottom: 24px;
-    position: relative; z-index: 1;
+    position: relative; z-index: 2;
   }
 
   .bars {
     display: flex; gap: 5px;
     margin-bottom: 26px;
-    position: relative; z-index: 1;
+    position: relative; z-index: 2;
   }
   .bars span {
     flex: 1; height: 3px;
@@ -239,7 +284,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    position: relative; z-index: 1;
+    position: relative; z-index: 2;
   }
   .tag {
     font-size: 10px;
@@ -617,15 +662,18 @@
     const grid = document.getElementById('grid');
     const TOTAL_BARS = 14;
 
-    SYSTEMS.forEach((sys) => {
+    SYSTEMS.forEach((sys, idx) => {
       const a = sys.accent;
       const grad = `linear-gradient(135deg, ${lighten(a, 30)}, ${a})`;
+      // Stagger beam rotation so cards aren't synced
+      const beamDelay = -((idx * 0.27) % 4).toFixed(2) + 's';
       const styles = [
         `--accent:${a}`,
         `--accent-glow:${withAlpha(a, 0.18)}`,
         `--accent-border:${withAlpha(a, 0.45)}`,
         `--accent-shadow:${withAlpha(a, 0.45)}`,
         `--accent-grad:${grad}`,
+        `--beam-delay:${beamDelay}`,
       ].join(';');
 
       const bars = Array.from({length: TOTAL_BARS}, (_, i) =>
@@ -639,6 +687,7 @@
       card.setAttribute('style', styles);
 
       card.innerHTML = `
+        <div class="beam-frame"><div class="beam"></div></div>
         <div class="card-head">
           <div class="icon"><svg width="24" height="24"><use href="#${sys.icon}"/></svg></div>
           <span class="status"><span class="pulse"></span>${sys.status}</span>
