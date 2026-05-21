@@ -1,0 +1,13 @@
+{
+  "name": "swish-all-portal",
+  "version": "1.0.0",
+  "description": "Swish Network Infrastructure - Unified Control Center for all company systems",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}
