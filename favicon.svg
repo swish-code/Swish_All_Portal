@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1a3a"/>
+      <stop offset="100%" stop-color="#040614"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38e1ff"/>
+      <stop offset="100%" stop-color="#2b6bff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0%" stop-color="#38e1ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#38e1ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Tile background -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- Soft inner glow -->
+  <rect width="64" height="64" rx="14" fill="url(#glow)"/>
+  <!-- Border -->
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="url(#stroke)" stroke-width="2"/>
+
+  <!-- Word mark -->
+  <text
+    x="32" y="40"
+    font-family="-apple-system, 'Segoe UI', Arial, sans-serif"
+    font-size="16"
+    font-weight="800"
+    fill="#ffffff"
+    text-anchor="middle"
+    letter-spacing="-0.4"
+  >Swish</text>
+
+  <!-- Accent under the wordmark -->
+  <rect x="22" y="46" width="20" height="2" rx="1" fill="#38e1ff"/>
+</svg>
