@@ -152,10 +152,13 @@
     text-decoration: none;
     color: inherit;
     transition: transform .3s ease, box-shadow .3s ease, background .3s ease;
-    backdrop-filter: blur(6px);
     cursor: pointer;
     isolation: isolate;
     overflow: hidden;
+    /* Perf: limit repaint scope + skip offscreen rendering */
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
   }
   /* Inside corner glow */
   .card::before {
@@ -189,30 +192,34 @@
     top: 50%; left: 50%;
     width: 260%;
     height: 260%;
-    transform: translate(-50%, -50%) rotate(0deg);
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
     background: conic-gradient(
       from 0deg,
       transparent 0%,
-      transparent 60%,
-      var(--accent) 75%,
+      transparent 58%,
+      var(--accent) 72%,
       #ffffff 80%,
-      var(--accent) 85%,
+      var(--accent) 88%,
       transparent 100%
     );
     animation: spinBeam 4s linear infinite;
     animation-delay: var(--beam-delay, 0s);
-    filter: blur(1px) drop-shadow(0 0 6px var(--accent));
+    will-change: transform;
+    /* No filter: blur/drop-shadow here — too expensive during scroll.
+       The white-hot center of the gradient gives the glow look natively. */
   }
   @keyframes spinBeam {
-    to { transform: translate(-50%, -50%) rotate(360deg); }
+    to { transform: translate3d(-50%, -50%, 0) rotate(360deg); }
   }
 
   .card:hover { transform: translateY(-4px); box-shadow: 0 30px 70px -28px var(--accent-shadow, transparent); }
   .card:hover::before { opacity: 1; }
   .card:hover .beam {
     animation-duration: 2s; /* speed up on hover */
-    filter: blur(1px) drop-shadow(0 0 10px var(--accent)) drop-shadow(0 0 16px var(--accent));
   }
+
+  /* Pause beam animations while the user is scrolling */
+  .scrolling .beam { animation-play-state: paused; }
 
   .card-head {
     display: flex;
@@ -759,6 +766,17 @@
         portal.setAttribute('aria-hidden', 'true');
       }
     });
+
+    /* Pause beam animations while the page is scrolling (smoother scroll on low-power devices) */
+    let scrollTimer = null;
+    const html = document.documentElement;
+    window.addEventListener('scroll', () => {
+      if (!html.classList.contains('scrolling')) {
+        html.classList.add('scrolling');
+      }
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => html.classList.remove('scrolling'), 180);
+    }, { passive: true });
   </script>
 </body>
 </html>
