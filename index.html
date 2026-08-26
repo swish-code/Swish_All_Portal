@@ -774,16 +774,12 @@
 
         buildBeams();
 
-        setTimeout(() => { window.location.href = url; }, 1500);
+        setTimeout(() => {
+          window.open(url, '_blank', 'noopener');
+          portal.classList.remove('show');
+          portal.setAttribute('aria-hidden', 'true');
+        }, 1500);
       });
-    });
-
-    /* Hide portal on bfcache restore */
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) {
-        portal.classList.remove('show');
-        portal.setAttribute('aria-hidden', 'true');
-      }
     });
 
     /* Pause beam animations while the page is scrolling (smoother scroll on low-power devices) */
